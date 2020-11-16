@@ -4,3 +4,5 @@ Identification of clinically relevant characteristic patterns of physical activi
 Diurnal_Analysis_ref.html contains analysis of continuous actigraphy in subjects with and without Mild Alzheimer’s. Download the .html to view it in browser.
 
 Diurnal_Analysis_ref.Rmd contains the code used in the analysis.
+
+All the R codes used in different sections of the report are also provided as seperate R functions.
