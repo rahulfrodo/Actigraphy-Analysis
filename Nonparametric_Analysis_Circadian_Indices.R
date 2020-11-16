@@ -2,6 +2,71 @@
 # x is a activity vector
 # raval = RA(x = x, method = "average")
 # This extracts the circadian parameters.
+####original code for extracting circadian parameters from minute level activity data###
+
+#library(ActCR)
+#path <- "E:/JHUPD/Deliverables/data/data/minute-csv"
+#setwd(path)
+#filelist<-list.files("E:/JHUPD/Deliverables/data/data/minute-csv")
+#myfiles <-lapply(filelist, read.csv)
+#subjdf<-matrix(NA,nrow = 92,ncol=8)
+
+#for(i in 1:92)
+#{
+#  mydata<-myfiles[[i]]
+#  mydata$ADStatus<-ifelse(mydata$ADStatus=="Yes",1,0)
+#  mydata$Sex<-ifelse(mydata$Sex=="Male",1,0)
+#  subdata<-mydata[,c("Date","Time","Vector.Magnitude")]
+#  library(chron)
+#  subdata$Time<-60 * 24 * as.numeric(times(subdata$Time))
+#  subdata$Date<-as.factor(subdata$Date)
+#  n<-nlevels(subdata$Date)
+#  lev<-levels(subdata$Date)
+#  datelev<-levels(subdata$Date)
+#  tbtick<-seq(0,1440,by=10)
+#  l=length(tbtick)-1
+#  actmat<-matrix(0,nrow = n,ncol = l)
+#  for(k in 1:n){
+#    for (j in 1:l)
+#    {
+#      tempdataj<-subdata[ subdata$Date==datelev[k]&subdata$Time>=tbtick[j]&subdata$Time <tbtick[j+1],] #not having obs on some day
+#      actmat[k,j]<-mean(tempdataj$Vector.Magnitude,na.rm =TRUE)
+#    }
+#  }
+#  actmat[is.nan(actmat)] = NA
+#  actmeanvec<-colMeans(actmat,na.rm = TRUE)
+#  ##replacing NA with mean
+#  for(s in 1:ncol(actmat)){
+#    actmat[is.na(actmat[,s]), s] <- mean(actmat[,s], na.rm = TRUE)
+#  }
+#  ISval = IS(x = actmat) 
+#  ivval = IV(x = actmeanvec)
+#  tbticklong<-seq(0,1439,by=1)
+#  llong=length(tbticklong)
+#  actlong<-c()
+#  for (l in 1:llong)
+#  {
+#    tempdataj<-subdata[subdata$Time==tbticklong[l],] #not having obs on some day
+#    actlong[l]<-mean(tempdataj$Vector.Magnitude,na.rm = TRUE)
+#  }
+#  actlong[is.nan(actlong)] = NA
+#  actlong[is.na(actlong)] = mean(actlong,na.rm = TRUE)
+#  raval = RA(x = actlong, method = "average")
+#  vec<-c(mydata$id[1],ISval,ivval,raval,mydata$Age[1],mydata$ADStatus[1],mydata$Sex[1],mydata$YearsOfEducation[1])
+#  subjdf[i,]<-vec
+#  }
+#subjdf<-as.data.frame(subjdf)
+#names(subjdf)<-c("id","is","iv","ra","age","adstatus","Sex","education")
+#summary(subjdf)
+#subjdf[2,]$education<-c(NA)
+##################
+#cogdata<-read.csv(file.choose("ACCEL cognitive data.csv"))###data containing cognitive scores info
+#ind<-which(cogdata$ï..ID%in%subjdf$id)
+#cogdatasub<-cogdata[ind,]
+#cogdatasub$id<-cogdatasub$ï..ID
+#dfcomb<-merge(subjdf, cogdatasub, by="id")
+#save(dfcomb,file="cogdfcirca.Rdata")
+
 #Loading pre-extracted data with circadian parameters
 
 path <- "E:/JHUPD/Deliverables/data/data"
