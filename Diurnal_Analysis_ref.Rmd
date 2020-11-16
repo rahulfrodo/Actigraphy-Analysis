@@ -571,7 +571,7 @@ library(refund)
 p<-seq(0,1,l=101)
 fit.lf <- pfr(adstatus~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2),data = subjdf,family="binomial")
 summary(fit.lf)
-plot(fit.lf,xlab="p",ylab=expression(paste(beta(p))))
+plot(fit.lf,xlab="p",ylab=expression(paste(beta(p))),,main="effect on log odds of AD")
 abline(h=0)
 ```
 
@@ -596,15 +596,15 @@ p<-seq(0,1,l=101)
 ###############cognitive scores as outcome###########
 fit.lf1 <- pfr(ATTN~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2),data = subjdf)
 summary(fit.lf1) #ADJ RSQ 0.218, PVAL=0.0182
-plot(fit.lf1,xlab="p",ylab=expression(paste(beta(p))))
+plot(fit.lf1,xlab="p",ylab=expression(paste(beta(p))),main="effect on ATTN")
 abline(h=0)
 fit.lf2 <- pfr(VM~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2),data = subjdf)
 summary(fit.lf2) #0.375 , pval=0.000229 ***
-plot(fit.lf2,xlab="p",ylab=expression(paste(beta(p))))
+plot(fit.lf2,xlab="p",ylab=expression(paste(beta(p))),main="effect on VM")
 abline(h=0)
 fit.lf3 <- pfr(ExecFunction~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2),data = subjdf)
 summary(fit.lf3) #adj rsq 0.347, pval=0.00438 **
-plot(fit.lf3,xlab="p",ylab=expression(paste(beta(p))))
+plot(fit.lf3,xlab="p",ylab=expression(paste(beta(p))),main="effect on ExecFunction")
 abline(h=0)
 ```
 
