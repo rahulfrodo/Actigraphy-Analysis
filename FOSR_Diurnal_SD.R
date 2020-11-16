@@ -1,4 +1,4 @@
-####Code for extracting diurnal mean activity profile from minute level data####
+####Code for extracting diurnal SD activity profile from minute level data####
 #library(ActCR)
 #path <- "E:/JHUPD/Deliverables/data/data/minute-csv"
 #setwd(path)
