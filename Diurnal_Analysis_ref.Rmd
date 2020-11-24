@@ -550,12 +550,13 @@ cnavg<-colMeans(actcontrol)
 adavg<-colMeans(actad)
 l1<-loess.smooth(p, cnavg,span = 0.5)
 l2<-loess.smooth(p, adavg,span=0.5)
-plot(l1$x,l1$y,type="l",col=4,xlab="time of day",ylab="average activity")
+#plot raw average quantile function or smoothed
+plot(p,cnavg,type="l",col="blue",xlab="time of day",ylab="average activity quantile function")
 #xtick<-seq(0, 24, by=2)
 #axis(side=1, at=xtick, labels = FALSE)
 #text(x=xtick,  par("usr")[3], 
  #    labels = xtick, srt = 0, pos = 1, xpd = TRUE)
-lines(l2$x,l2$y,type="l",col=2,lty=2)  
+lines(p,adavg,type="l",col="red",lty=2)  
 legend('topleft',c("AD ","control") , 
        lty=c(2,1), col=c("red", "blue"), bty='n', cex=.75)
 ```
