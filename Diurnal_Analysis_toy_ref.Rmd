@@ -1,0 +1,975 @@
+---
+title: "Identification of clinically relevant characteristic patterns of physical activity measured via continuous actigraphy in subjects with and without Mild Alzheimer’s: A toy illustration."
+author: "Rahul Ghosal"
+date: "02/11/2021"
+header-includes:
+  - \usepackage{bm}
+  - \usepackage{multirow}
+  - \usepackage{float}
+  - \newcommand{\Real}{\mathbb{R}}
+  - \newcommand{\dom}{{\bf dom}\,}
+  - \newcommand{\Tra}{^{\sf T}} % Transpose
+  - \newcommand{\Inv}{^{-1}} % Inverse
+  - \def\vec{\mathop{\rm vec}\nolimits}
+  - \newcommand{\diag}{\mathop{\rm diag}\nolimits}
+  - \newcommand{\tr}{\operatorname{tr}} % Trace
+  - \newcommand{\epi}{\operatorname{epi}} % epigraph
+  - \newcommand{\V}[1]{{\bm{\mathbf{\MakeLowercase{#1}}}}} % vector
+  - \newcommand{\VE}[2]{\MakeLowercase{#1}_{#2}} % vector element
+  - \newcommand{\Vn}[2]{\V{#1}^{(#2)}} % n-th vector
+  - \newcommand{\Vtilde}[1]{{\bm{\tilde \mathbf{\MakeLowercase{#1}}}}} % vector
+  - \newcommand{\Vhat}[1]{{\bm{\hat \mathbf{\MakeLowercase{#1}}}}} % vector
+  - \newcommand{\VtildeE}[2]{\tilde{\MakeLowercase{#1}}_{#2}} % vector element
+  - \newcommand{\M}[1]{{\bm{\mathbf{\MakeUppercase{#1}}}}} % matrix
+  - \newcommand{\ME}[2]{\MakeLowercase{#1}_{#2}} % matrix element
+  - \newcommand{\Mtilde}[1]{{\bm{\tilde \mathbf{\MakeUppercase{#1}}}}} % matrix
+  - \newcommand{\Mbar}[1]{{\bm{\bar \mathbf{\MakeUppercase{#1}}}}} % matrix
+  - \newcommand{\Mn}[2]{\M{#1}^{(#2)}} % n-th matrix
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Intoduction
+
+The prevalent number of AD cases in the United States is projected to more than double from nearly 5 million in 2014 to nearly 14 million by 2060 and costs will rise to over $1 trillion (Alzheimer's Association, 2020).  In the absence of effective therapies to prevent or treat AD, there is growing interest in identifying cost effective biomarkers for early identification of risk for AD.  Biomarkers are useful tools for identifying individuals early in disease progression who may benefit from treatments or trials, for use as surrogate end-points for clinical trials, and as a way to better understand mechanisms of disease progression to identify targets for interventions.
+ 
+Non-invasive, cost-effective biomarkers are essential to improving diagnosis of AD across multiple care settings and screening large numbers of individuals to direct them into targeted clinical trials (Zvěřová, 2018).  Recently, “digital” biomarkers from sensor and mobile/wearable devices (Thambisetty & Lovestone, 2010; Kourtis, Regele, Wright, & Jones, 2019) have been suggested for early detection as an alternative to fluid and imaging markers considering mounting evidence indicating that sensory and motor changes may precede neurologic and neurodegenerative diseases.
+
+# Data
+Mild AD (n = 39) and cognitive normal control (CNC; n = 53) participants from the University of Kansas Alzheimer’s Disease Center Registry (KU-ADC) wore a GT3x+ accelerometer for 24 hours a day for seven days. The objective is to explore the efficacy of continuously measured physical activity to differentiate between mild AD and CNC participants and study its association with cognitive performance. Participant demographics for the original data are displayed in Table 1.
+
+![](E:/JHUPD/Paper1/sd final results/dempap3.JPG)
+
+We present below our analysis using the simulated toy data for acceleremetry and cognitive scores.
+
+# Parametric Analysis Using Cosinor Modelling
+We consider paraetric analysis of actigraphy data using Cosinor models. We derive subject specific cosinor model parameters and study their association with cognitive status and cognitive performance represnted by cognitive scores of verbal memory (VM), attention (ATTN), and executive function (EF). The cosninor parameters mes (mesor representing a rhythm-adjusted mean), amp (amplitude representing variability around the mean) and acr(acrotime representing the timing of the peak activity) for each subject have been calculated using "ActCR" package (code shown below) from minute level activity data.
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+# processing raw minute level accelometry data (toy) for cosinor analysis
+path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+setwd(path)
+load("toy_accl.Rdata")
+myfiles <-toyfiles
+subjdf<-matrix(0,nrow = 92,ncol=8)
+subjdf<-as.data.frame(subjdf)
+for(i in 1:92)
+{
+mydata<-myfiles[[i]]
+mydata$ADStatus<-ifelse(mydata$ADStatus=="Yes",1,0)
+mydata$Sex<-ifelse(mydata$Sex=="Male",1,0)
+#Date, Time , Vector.Magnitude
+subdata<-mydata[,c("Date","Time","Vector.Magnitude")]
+library(chron)
+subdata$Time<-60 * 24 * as.numeric(times(subdata$Time))
+n<-nlevels(subdata$Date)
+lev<-levels(subdata$Date)
+tbtick<-seq(0,1440,by=10)
+actvec<-c()
+l=length(tbtick)-1
+for (j in 1:l)
+{
+tempdataj<-subdata[subdata$Time>=tbtick[j]&subdata$Time <tbtick[j+1],]
+actvec[j]<-mean(tempdataj$Vector.Magnitude)
+}
+library(ActCR)
+cos_coeff = ActCosinor(x = actvec, window = 10) #window of 10 minutes
+subjdf[i,]<-c(mydata$ID[1],cos_coeff$mes,cos_coeff$amp,cos_coeff$acr,mydata$Age[1]
+  ,mydata$ADStatus[1],mydata$Sex[1],mydata$YearsOfEducation[1])
+}
+
+names(subjdf)<-c("id","mes","amp","acr","age","adstatus","Sex","education")
+summary(subjdf)
+subjdf[2,]$education<-c(NA) ##replacing -999 value with NA
+##merge with toy cognitve data by id#
+load("toy_cognitive.Rdata")
+dfcomb<-merge(subjdf, cogdatasub, by="id")
+```
+
+First we explore cognitive status (AD or CNC) and Sex specific difference in the cosinor parameters. 
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+par(mfrow=c(2,2))
+boxplot(mes~adstatus,data=dfcomb,names=c("control","ad"),ylab="mes")
+boxplot(amp~adstatus,data=dfcomb,names=c("control","ad"),ylab="amp")
+boxplot(acr~adstatus,data=dfcomb,names=c("control","ad"),ylab="acr")
+
+```
+
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+par(mfrow=c(2,2))
+boxplot(mes~Sex,data=dfcomb,names=c("Female","Male"),ylab="mes")
+boxplot(amp~Sex,data=dfcomb,names=c("Female","Male"),ylab="amp")
+boxplot(acr~Sex,data=dfcomb,names=c("Female","Male"),ylab="acr")
+```
+
+We display below the scatterplot of consior parameters with age, education and cognitive scores of attention, verbal memory and executive function.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+subsetdfcomb<-dfcomb[,c(-1)]
+plot(subsetdfcomb[,-c(5,6)])
+```
+
+We study association between cognitive status (AD/CNC) with subject specific cosinor parameters using logistic regression model and adjusting for age,sex and education.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(readr)
+library(tidyr)
+library(sjPlot)
+
+dfcomb$education[2]<-mean(dfcomb$education,na.rm=TRUE)
+glm1<-glm(adstatus~age+Sex+education,data=dfcomb,family = "binomial")
+glm11<-glm(adstatus~age+Sex+education+mes,data=dfcomb,family = "binomial")
+glm12<-glm(adstatus~age+Sex+education+amp,data=dfcomb,family = "binomial")
+glm13<-glm(adstatus~age+Sex+education+acr,data=dfcomb,family = "binomial")
+tab_model(glm1,glm11,glm12,glm13,title = " Generalized Linear Model of adstatus on age, sex, education and cosinor parametrs")
+```
+
+<br/><br/>
+
+Next, we study association between cognitive scores and each of the subject specific cosinor parameters using linear regression model adjusting for age,sex and education.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+lm11<-lm(ATTN~age+Sex+education,data=dfcomb)
+lm12<-lm(ATTN~age+Sex+education+mes,data=dfcomb)
+lm13<-lm(ATTN~age+Sex+education+amp,data=dfcomb)
+lm14<-lm(ATTN~age+Sex+education+acr,data=dfcomb)
+
+tab_model(lm11,lm12,lm13,lm14,title = "Modelling cognitive scores of attention using cosinor parameters")
+
+lm21<-lm(VM~age+Sex+education,data=dfcomb)
+lm22<-lm(VM~age+Sex+education+mes,data=dfcomb)
+lm23<-lm(VM~age+Sex+education+amp,data=dfcomb)
+lm24<-lm(VM~age+Sex+education+acr,data=dfcomb)
+
+tab_model(lm21,lm22,lm23,lm24,title = "Modelling cognitive scores of verbal memory using cosinor parameters")
+
+lm31<-lm(ExecFunction~age+Sex+education,data=dfcomb)
+lm32<-lm(ExecFunction~age+Sex+education+mes,data=dfcomb)
+lm33<-lm(ExecFunction~age+Sex+education+amp,data=dfcomb)
+lm34<-lm(ExecFunction~age+Sex+education+acr,data=dfcomb)
+tab_model(lm31,lm32,lm33,lm34,title = "Modelling cognitive scores of executive function using cosinor parameters")
+```
+
+<br/><br/>
+**Takeaway** : This is simulated toy data, refer to the original report.
+
+## Summary
+
+* This is simulated toy data, refer to the original report.
+
+* This is simulated toy data, refer to the original report.
+
+# Nonparametric Analysis using Nonparametric Indices of Circadian Rhythmicity
+
+We consider nonparametric analysis of actigraphy data using nonparametric indices of Circadian Rhythmicity. In Particular, we study association between the nonparametric indices of circadian rhythmicity with cognitive status and cognitive factor scores. The circadian indices
+IS (interdaily stability), IV (intradaily variability) and RA (relative amplitude) are again calculated using the "ActCR" package (code shown below) from minute level activity data.
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+rm(list=ls())
+# processing raw minute level accelometry data (toy) for circadian analysis
+path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+setwd(path)
+load("toy_accl.Rdata")
+myfiles <-toyfiles
+subjdf<-matrix(NA,nrow = 92,ncol=8)
+
+for(i in 1:92)
+{
+  mydata<-myfiles[[i]]
+  mydata$ADStatus<-ifelse(mydata$ADStatus=="Yes",1,0)
+  mydata$Sex<-ifelse(mydata$Sex=="Male",1,0)
+  #Date, Time , Vector.Magnitude
+  subdata<-mydata[,c("Date","Time","Vector.Magnitude")]
+  library(chron)
+  subdata$Time<-60 * 24 * as.numeric(times(subdata$Time))
+  subdata$Date<-as.factor(subdata$Date)
+  n<-nlevels(subdata$Date)
+  lev<-levels(subdata$Date)
+  datelev<-levels(subdata$Date)
+  tbtick<-seq(0,1440,by=10)
+  l=length(tbtick)-1
+  actmat<-matrix(0,nrow = n,ncol = l)
+  for(k in 1:n){
+  for (j in 1:l)
+  {
+    tempdataj<-subdata[ subdata$Date==datelev[k]&subdata$Time>=tbtick[j]&subdata$Time <tbtick[j+1],] #not having obs on some day
+    actmat[k,j]<-mean(tempdataj$Vector.Magnitude,na.rm =TRUE)
+  }
+  }
+  actmat[is.nan(actmat)] = NA
+  actmeanvec<-colMeans(actmat,na.rm = TRUE)
+  ##replacing NA with mean
+  for(s in 1:ncol(actmat)){
+    actmat[is.na(actmat[,s]), s] <- mean(actmat[,s], na.rm = TRUE)
+  }
+  ISval = IS(x = actmat) 
+  ivval = IV(x = actmeanvec)
+  tbticklong<-seq(0,1439,by=1)
+  llong=length(tbticklong)
+  actlong<-c()
+    for (l in 1:llong)
+    {
+      tempdataj<-subdata[subdata$Time==tbticklong[l],] #not having obs on some day
+      actlong[l]<-mean(tempdataj$Vector.Magnitude,na.rm = TRUE)
+    }
+  actlong[is.nan(actlong)] = NA
+  actlong[is.na(actlong)] = mean(actlong,na.rm = TRUE)
+  library(ActCR)
+  raval = RA(x = actlong, method = "average")
+  vec<-c(mydata$ID[1],ISval,ivval,raval,mydata$Age[1],mydata$ADStatus[1],mydata$Sex[1],mydata$YearsOfEducation[1])
+  subjdf[i,]<-vec
+ }
+subjdf<-as.data.frame(subjdf)
+names(subjdf)<-c("id","is","iv","ra","age","adstatus","Sex","education")
+summary(subjdf)
+subjdf[2,]$education<-c(NA)
+##merge with toy cognitve data by id#
+load("toy_cognitive.Rdata")
+dfcomb<-merge(subjdf, cogdatasub, by="id")
+
+
+```
+
+we display boxplot of the subject specific nornparametric indices against adstatus and gender.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+par(mfrow=c(2,2))
+boxplot(is~adstatus,data=dfcomb,names=c("control","ad"),ylab="IS")
+boxplot(iv~adstatus,data=dfcomb,names=c("control","ad"),ylab="IV")
+boxplot(ra~adstatus,data=dfcomb,names=c("control","ad"),ylab="RA")
+
+par(mfrow=c(2,2))
+boxplot(is~Sex,data=dfcomb,names=c("Female","Male"),ylab="IS")
+boxplot(iv~Sex,data=dfcomb,names=c("Female","Male"),ylab="IV")
+boxplot(ra~Sex,data=dfcomb,names=c("Female","Male"),ylab="RA")
+
+```
+
+It is not immediately clear which indices could be informative for cognitive performance. We display below the scatterplot of the nonparametric indices with age, education and cognitive scores of attention, verbal memory and executive function.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+subsetdfcomb<-dfcomb[,c(-1)]
+plot(subsetdfcomb[,-c(5,6)])
+```
+
+Next, we study association between cognitive staus (AD/CNC) with subject specific nonparametric indices of circadian rhythmicity using logistic regression model adjusting for age,sex and education.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+dfcomb$education[2]<-mean(dfcomb$education,na.rm=TRUE)
+glm1<-glm(adstatus~age+Sex+education,data=dfcomb,family = "binomial")
+glm11<-glm(adstatus~age+Sex+education+is,data=dfcomb,family = "binomial")
+glm12<-glm(adstatus~age+Sex+education+iv,data=dfcomb,family = "binomial")
+glm13<-glm(adstatus~age+Sex+education+ra,data=dfcomb,family = "binomial")
+tab_model(glm1,glm11,glm12,glm13,title = "Modelling cognitive status using circadian rhythmicity parameters")
+
+```
+
+<br/><br/>
+
+This is simulated toy data, refer to the original report.
+
+Next, we study association between cognitive factor scores with the subject specific nonparametric indices adjusting for age,sex and education.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+lm11<-lm(ATTN~age+Sex+education,data=dfcomb)
+lm12<-lm(ATTN~age+Sex+education+is,data=dfcomb)
+lm13<-lm(ATTN~age+Sex+education+iv,data=dfcomb)
+lm14<-lm(ATTN~age+Sex+education+ra,data=dfcomb)
+tab_model(lm11,lm12,lm13,lm14,title = "Modelling cognitive scores of attention using circadian parameters")
+
+lm21<-lm(VM~age+Sex+education,data=dfcomb)
+lm22<-lm(VM~age+Sex+education+is,data=dfcomb)
+lm23<-lm(VM~age+Sex+education+iv,data=dfcomb)
+lm24<-lm(VM~age+Sex+education+ra,data=dfcomb)
+tab_model(lm21,lm22,lm23,lm24,title = "Modelling cognitive scores of verbal memory using circadian parameters")
+
+lm31<-lm(ExecFunction~age+Sex+education,data=dfcomb)
+lm32<-lm(ExecFunction~age+Sex+education+is,data=dfcomb)
+lm33<-lm(ExecFunction~age+Sex+education+iv,data=dfcomb)
+lm34<-lm(ExecFunction~age+Sex+education+ra,data=dfcomb)
+tab_model(lm31,lm32,lm33,lm34,title = "Modelling cognitive scores of ececutive function using circadian parameters")
+
+```
+
+<br/><br/>
+**Takeaway** : This is simulated toy data, refer to the original report.
+
+## Summary
+
+* This is simulated toy data, refer to the original report.
+
+* This is simulated toy data, refer to the original report.
+
+# FOSR Analysis Using Diurnal Mean Activity
+
+We consider functional approaches for modelling continuous 24*7 actigraphy data. For each subject. we derive the mean daily activity curve $X_i(t)$ averaged over 7 days. 
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+rm(list=ls())
+# processing raw minute level accelometry data (toy) for diurnal analysis
+path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+setwd(path)
+load("toy_accl.Rdata")
+myfiles <-toyfiles
+subjdf<-matrix(0,nrow = 92,ncol=7)
+subjdf<-as.data.frame(subjdf)
+actmat<-matrix(0,nrow = 92,ncol=144)
+for(i in 1:92)
+{
+  mydata<-myfiles[[i]]
+  mydata$ADStatus<-ifelse(mydata$ADStatus=="Yes",1,0)
+  mydata$Sex<-ifelse(mydata$Sex=="Male",1,0)
+  #Date, Time , Vector.Magnitude
+  subdata<-mydata[,c("Date","Time","Vector.Magnitude")]
+  library(chron)
+  subdata$Time<-60 * 24 * as.numeric(times(subdata$Time))
+  n<-nlevels(subdata$Date)
+  lev<-levels(subdata$Date)
+  tbtick<-seq(0,1440,by=10)
+  actvec<-c()
+  l=length(tbtick)-1
+  for (j in 1:l)
+  {
+    tempdataj<-subdata[subdata$Time>=tbtick[j]&subdata$Time <tbtick[j+1],]
+    actvec[j]<-mean(tempdataj$Vector.Magnitude,na.rm = TRUE)
+  }
+  
+  subjdf[i,]<-c(mydata$ID[1],mydata$Age[1],mydata$ADStatus[1],mydata$Sex[1],mydata$YearsOfEducation[1],mydata$V02maxkg[1],mydata$BMI[1])
+  actmat[i,]<-actvec
+ }
+names(subjdf)<-c("id","age","adstatus","Sex","education","V02maxkg","BMI")
+summary(subjdf)
+subjdf[2,]$education<-c(NA)
+##################
+subjdf$actmat<-actmat
+```
+
+The smoothed average activity profiles for AD and cognitively normal control (CNC) samples are displayed below.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
+tbtick<-seq(0,1440,by=10)
+binmid<-tbtick+5
+binmid<-binmid[-145]
+indAD<-which(subjdf$adstatus==1)
+actad<-subjdf$actmat[indAD,]
+actcontrol<-subjdf$actmat[-indAD,]
+cnavg<-colMeans(actcontrol)
+adavg<-colMeans(actad)
+l1<-loess.smooth(binmid, cnavg,span = 0.25)
+l2<-loess.smooth(binmid, adavg,span = 0.25)
+plot(l1$x/60,l1$y,type="l",col="blue",xaxt="n",xlab="time of day",ylab="average activity")
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+lines(l2$x/60,l2$y,type="l",col="red",lty=2)  
+legend('topleft',c("AD ","control") , 
+       lty=c(2,1), col=c("red", "blue"), bty='n', cex=.75)
+```
+
+We fit a function-on-scalar regression (FOSR) model analyzing dependence of diurnal mean activity on adstatus (AD/CNC) and adjusting for age, sex and eucation. We use the pffr function in "refund" package for implementation of FOSR.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+library(refund)
+fit <- pffr(actmat~ age+Sex+adstatus+education,yind=(binmid/60), data = subjdf,bs.yindex = list(bs = "ps",
+k = 12, m = c(2, 2)), bs.int = list(bs = "ps", k = 12, m = c(2, 2)))
+summary(fit)
+```
+
+This is simulated toy data, refer to the original report.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
+par(mfrow=c(2,2))
+plot(fit,select = 4,ylim=c(-250,100),xaxt="n",ylab = "ad diurnal effect",xlab="time of day")
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+abline(h=0)
+plot(fit,select = 3,xaxt="n",ylim=c(-60,150),ylab = "sex (Male) diurnal effect",xlab="time of day")
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+abline(h=0)
+plot(fit,select = 2,xaxt="n",ylim=c(-15,10),ylab = "age diurnal effect",xlab="time of day")
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+abline(h=0)
+plot(fit,select = 5,xaxt="n",ylim=c(-10,20),ylab = "education diurnal effect",xlab="time of day")
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+abline(h=0)
+```
+
+**FOSR Model Results** 
+
+This is simulated toy data, refer to the original report.
+
+
+We display the fitted diurnal profiles of expected physical activity at mean level of age, education.
+
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
+fitmat<-predict(fit)  #match
+#fitmat[1:3,]
+predtrain<-predict(fit,newdata = subjdf)  #total match with fitmat
+newtedataMY<-data.frame("age"=mean(subjdf$age),"Sex"=1,"adstatus"=1,"education"=mean(subjdf$education))
+predtMY<-predict(fit,newdata = newtedataMY)
+newtedataMN<-data.frame("age"=mean(subjdf$age),"Sex"=1,"adstatus"=0,"education"=mean(subjdf$education))
+predtMN<-predict(fit,newdata = newtedataMN)
+newtedataFY<-data.frame("age"=mean(subjdf$age),"Sex"=0,"adstatus"=1,"education"=mean(subjdf$education))
+predtFY<-predict(fit,newdata = newtedataFY)
+newtedataFN<-data.frame("age"=mean(subjdf$age),"Sex"=0,"adstatus"=0,"education"=mean(subjdf$education))
+predtFN<-predict(fit,newdata = newtedataFN)
+par(mfrow=c(1,2))
+tnew<-(binmid/60)
+plot(tnew,predtMY,type="o",col="red",xlab="hour",ylab="fitted meandiurnal curve",main="diurnal fit male",ylim = c(0,700))
+lines(tnew,predtMN,type="o",col="blue")
+legend('topleft',c("ad=Yes","ad=No") , 
+       lty=c(1,1), col=c('red', 'blue'),pch=c(1,1), bty='n', cex=.75)
+plot(tnew,predtFY,type="o",col="red",xlab="hour",ylab="fitted mean diurnal curve",main="diurnal fit female",ylim=c(0,700))
+lines(tnew,predtFN,type="o",col="blue")
+legend('topleft',c("ad=Yes","ad=No") , 
+       lty=c(1,1), col=c('red', 'blue'),pch=c(1,1), bty='n', cex=.75)
+
+```
+
+
+## Summary
+
+* This is simulated toy data, refer to the original report.
+* This is simulated toy data, refer to the original report.
+* This is simulated toy data, refer to the original report.
+
+# SOFR Analysis of Cognitive Scores Using Diurnal Mean Activity:
+
+Next, we perform SOFR (scalar-on-function regression), modelling continuous congnitive scores as a function of diurnal physical activity and adjusting for age, sex and education. The associated coeffcient functions corresponding to diurnal mean activity are also displayed which represent the effect of diurnal mean activity on the cognitive scores. We use the pfr function in "refund" package for implementation of SOFR.
+
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
+#diurnal dataframe subjdf
+tbtick<-seq(0,1440,by=10)
+binmid<-tbtick+5
+binmid<-binmid[-145]
+load("toy_cognitive.Rdata")
+ind<-which(cogdatasub$id%in%subjdf$id)
+cogdatasub<-cogdatasub[ind,]
+cogdatasub<-cogdatasub[c(1:4,89:92,5:88),] ##matching the id order with subjdf
+
+subjdf$ATTN<-cogdatasub$ATTN
+subjdf$VM<-cogdatasub$VM
+subjdf$ExecFunction<-cogdatasub$ExecFunction
+
+library(refund)
+###############cognitive scores as outcome###########
+fit.lf1 <- pfr(ATTN~ age+Sex+education+lf(actmat,argvals=(binmid/60), k=12, bs="ps",m=2),data = subjdf)
+summary(fit.lf1)
+plot(fit.lf1,xlab="t",ylab=expression(paste(beta(t))),main="effect on ATTN")
+abline(h=0)
+fit.lf2 <- pfr(VM~ age+Sex+education+lf(actmat,argvals=(binmid/60), k=12, bs="ps",m=2),data = subjdf)
+summary(fit.lf2)
+plot(fit.lf2,xlab="t",ylab=expression(paste(beta(t))),main="effect on VM")
+abline(h=0)
+fit.lf3 <- pfr(ExecFunction~ age+Sex+education+lf(actmat,argvals=(binmid/60), k=12, bs="ps",m=2),data = subjdf)
+summary(fit.lf3)
+plot(fit.lf3,xlab="t",ylab=expression(paste(beta(t))),main="effect on ExecFunction")
+abline(h=0)
+```
+
+## Summary
+* This is simulated toy data, refer to the original report. 
+* This is simulated toy data, refer to the original report.
+
+
+# FOSR Analysis Using Diurnal SD Activity Curves
+
+So far we have used the mean levels of daily activity as outcome or predictor in our analysis to explore its association with cognitive performance. The variability of the curves could also potentially provide uniqe insight into cognitive impairment. For this purpose we obtain the diurnal SD (standard deviation) curve  $S_i(t)$ as follows. For raw activity data $X_{ij}(s)$, $j=1,\ldots,7$ we define $S_i(t)=sd\{X_{ij}(s)\}, s \in (t-h,t+h)$, where $2*h$ is the window length and taken to be 10 minutes in this analysis.
+
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+rm(list=ls())
+# processing raw minute level accelometry data (toy) for diurnal analysis
+path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+setwd(path)
+load("toy_accl.Rdata")
+myfiles <-toyfiles
+subjdf<-matrix(0,nrow = 92,ncol=7)
+subjdf<-as.data.frame(subjdf)
+actmat<-matrix(0,nrow = 92,ncol=144)
+for(i in 1:92)
+{
+  mydata<-myfiles[[i]]
+  mydata$ADStatus<-ifelse(mydata$ADStatus=="Yes",1,0)
+  mydata$Sex<-ifelse(mydata$Sex=="Male",1,0)
+  #Date, Time , Vector.Magnitude
+  subdata<-mydata[,c("Date","Time","Vector.Magnitude")]
+  library(chron)
+  subdata$Time<-60 * 24 * as.numeric(times(subdata$Time))
+  n<-nlevels(subdata$Date)
+  lev<-levels(subdata$Date)
+  tbtick<-seq(0,1440,by=10)
+  actvec<-c()
+  l=length(tbtick)-1
+  for (j in 1:l)
+  {
+    tempdataj<-subdata[subdata$Time>=tbtick[j]&subdata$Time <tbtick[j+1],]
+    actvec[j]<-sd(tempdataj$Vector.Magnitude,na.rm = TRUE)
+  }
+  
+  subjdf[i,]<-c(mydata$ID[1],mydata$Age[1],mydata$ADStatus[1],mydata$Sex[1],mydata$YearsOfEducation[1],mydata$V02maxkg[1],mydata$BMI[1])
+  actmat[i,]<-actvec
+ }
+names(subjdf)<-c("id","age","adstatus","Sex","education","V02maxkg","BMI")
+summary(subjdf)
+subjdf[2,]$education<-c(NA)
+##################
+subjdf$actmat<-actmat
+```
+
+
+The smoothed SD_activity profiles for AD and CNC averaged across the respective samples are displayed below (for simulated toy data).
+
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
+#summary(subjdf)
+subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
+tbtick<-seq(0,1440,by=10)
+binmid<-tbtick+5
+binmid<-binmid[-145]
+indAD<-which(subjdf$adstatus==1)
+actad<-subjdf$actmat[indAD,]
+actcontrol<-subjdf$actmat[-indAD,]
+cnavg<-colMeans(actcontrol)
+adavg<-colMeans(actad)
+l1<-loess.smooth(binmid, cnavg,span = 0.25)
+l2<-loess.smooth(binmid, adavg,span=0.25)
+plot(l1$x/60,l1$y,type="l",col="blue",xaxt="n",xlab="time of day",ylab="activity (sd) diurnal curve",ylim=c(450,600))
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+lines(l2$x/60,l2$y,type="l",col="red",lty=2)  
+legend('topleft',c("AD ","control") , 
+       lty=c(2,1), col=c("red", "blue"), bty='n', cex=.75)
+```
+
+
+This is simulated toy data, refer to the original report. 
+
+We again fit a FOSR model analyzing the effect of adstatus on diurnal pattern of SD_activity adjusting for age,sex and education.
+
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+library(refund)
+fit <- pffr(actmat~ age+Sex+adstatus+education,yind=(binmid/60), data = subjdf,bs.yindex = list(bs = "ps",
+k = 12, m = c(2, 2)), bs.int = list(bs = "ps", k = 12, m = c(2, 2)))
+summary(fit)
+```
+
+**FOSR Results Using SD Activity**
+
+this is simulated toy data, refer to the original report. 
+
+
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
+par(mfrow=c(2,2))
+plot(fit,select = 4,ylim=c(-270,100),xaxt="n",ylab = "ad diurnal effect (SD)",xlab="time of day")
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+abline(h=0)
+plot(fit,select = 3,xaxt="n",ylim=c(-60,170),ylab = "sex (Male) diurnal effect (SD)",xlab="time of day")
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+abline(h=0)
+plot(fit,select = 2,xaxt="n",ylim=c(-15,10),ylab = "age diurnal effect (SD)",xlab="time of day")
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+abline(h=0)
+plot(fit,select = 5,xaxt="n",ylim=c(-10,15),ylab = "education diurnal effect (SD)",xlab="time of day")
+xtick<-seq(0, 24, by=2)
+axis(side=1, at=xtick, labels = FALSE)
+text(x=xtick,  par("usr")[3], 
+     labels = xtick, srt = 0, pos = 1, xpd = TRUE)
+abline(h=0)
+
+```
+
+this is simulated toy data, refer to the original report. 
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
+fitmat<-predict(fit)  #match
+#fitmat[1:3,]
+predtrain<-predict(fit,newdata = subjdf)  #total match with fitmat
+newtedataMY<-data.frame("age"=mean(subjdf$age),"Sex"=1,"adstatus"=1,"education"=mean(subjdf$education))
+predtMY<-predict(fit,newdata = newtedataMY)
+newtedataMN<-data.frame("age"=mean(subjdf$age),"Sex"=1,"adstatus"=0,"education"=mean(subjdf$education))
+predtMN<-predict(fit,newdata = newtedataMN)
+newtedataFY<-data.frame("age"=mean(subjdf$age),"Sex"=0,"adstatus"=1,"education"=mean(subjdf$education))
+predtFY<-predict(fit,newdata = newtedataFY)
+newtedataFN<-data.frame("age"=mean(subjdf$age),"Sex"=0,"adstatus"=0,"education"=mean(subjdf$education))
+predtFN<-predict(fit,newdata = newtedataFN)
+par(mfrow=c(1,2))
+tnew<-(binmid/60)
+plot(tnew,predtMY,type="o",col="red",xlab="hour",ylab="fitted sd diurnal curve",main="diurnal fit male",ylim = c(400,700))
+lines(tnew,predtMN,type="o",col="blue")
+legend('topleft',c("ad=Yes","ad=No") , 
+       lty=c(1,1), col=c('red', 'blue'),pch=c(1,1), bty='n', cex=.75)
+plot(tnew,predtFY,type="o",col="red",xlab="hour",ylab="fitted sd diurnal curve",main="diurnal fit female",ylim=c(400,700))
+lines(tnew,predtFN,type="o",col="blue")
+legend('topleft',c("ad=Yes","ad=No") , 
+       lty=c(1,1), col=c('red', 'blue'),pch=c(1,1), bty='n', cex=.75)
+
+```
+
+
+## Summary
+
+This is simulated toy data, refer to the original report. 
+
+# SOFR Analysis Using SD_Activity Curve
+
+Next, we perform SOFR modeling of the congnitive scores as function of diurnal SD_activity, adjusting for age, sex and education. The results from the model fit and the estimated coefficient functions
+are displayed below.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
+#diurnal dataframe subjdf
+tbtick<-seq(0,1440,by=10)
+binmid<-tbtick+5
+binmid<-binmid[-145]
+load("toy_cognitive.Rdata")
+ind<-which(cogdatasub$id%in%subjdf$id)
+cogdatasub<-cogdatasub[ind,]
+cogdatasub<-cogdatasub[c(1:4,89:92,5:88),] ##matching the id order with subj
+subjdf$ATTN<-cogdatasub$ATTN
+subjdf$VM<-cogdatasub$VM
+subjdf$ExecFunction<-cogdatasub$ExecFunction
+
+library(refund)
+###############cognitive scores as outcome###########
+fit.lf1 <- pfr(ATTN~ age+Sex+education+lf(actmat,argvals=binmid/60, k=12, bs="ps",m=2),data = subjdf)
+summary(fit.lf1)
+plot(fit.lf1,xlab="t",ylab=expression(paste(beta(t))),main="effect on ATTN")
+abline(h=0)
+fit.lf2 <- pfr(VM~ age+Sex+education+lf(actmat,argvals=binmid/60, k=12, bs="ps",m=2),data = subjdf)
+summary(fit.lf2)
+plot(fit.lf2,xlab="t",ylab=expression(paste(beta(t))),main="effect on VM")
+abline(h=0)
+fit.lf3 <- pfr(ExecFunction~ age+Sex+education+lf(actmat,argvals=binmid/60, k=12, bs="ps",m=2),data = subjdf)
+summary(fit.lf3)
+plot(fit.lf3,xlab="t",ylab=expression(paste(beta(t))),main="effect on ExecFunction")
+abline(h=0)
+```
+
+## Summary
+* This is simulated toy data, refer to the original report.  
+* This is simulated toy data, refer to the original report. 
+
+**Remark:** 
+This is simulated toy data, refer to the original report. 
+
+
+# Modelling Using Subject Specific Quantile Functions of Activity 
+
+## SOFR analysis Using Subject Specific Quantile Functions
+
+Distributional regression is an emerging area of research which have diverse applications specially for multi-view and repeated measures data. Various ways to incorporate the distributional information could involve the distribution function itself, density function, histogram, quantile function etc. Although they all essentially characterize the underlying distribution, they answer different questions from practical point of view. The subject specific quantile functions enjoy uniform support on $(0,1)$ unlike subject specific histograms or distribution functions which can possibly have unequal (effective) support. In this section, We consider using the subject specific quantile functions $Q_i(p)$ of physical activity for SOFR modelling of cognitive status and cognitive scores. 
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+sddf<-subjdf
+rm(list=setdiff(ls(), "sddf"))
+# processing raw minute level accelometry data (toy) for extracting
+#subject-specific quantile functions
+path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+setwd(path)
+load("toy_accl.Rdata")
+myfiles<- toyfiles
+subjdf<-matrix(0,nrow = 92,ncol=5)
+subjdf<-as.data.frame(subjdf)
+actmat<-matrix(0,nrow = 92,ncol=101)
+for(i in 1:92)
+{
+  mydata<-myfiles[[i]]
+  mydata$ADStatus<-ifelse(mydata$ADStatus=="Yes",1,0)
+  mydata$Sex<-ifelse(mydata$Sex=="Male",1,0)
+  #Date, Time , Vector.Magnitude
+  subdata<-mydata[,c("Date","Time","Vector.Magnitude")]
+  library(chron)
+  subdata$Time<-60 * 24 * as.numeric(times(subdata$Time))
+  n<-nlevels(subdata$Date)
+  lev<-levels(subdata$Date)
+  
+  actvec<-quantile(subdata$Vector.Magnitude,probs=c(seq(0,1,l=101)),na.rm=TRUE)
+  
+  #cos_coeff = ActCosinor(x = actvec, window = 10) #window of 10 minutes
+  subjdf[i,]<-c(mydata$ID[1],mydata$Age[1],mydata$ADStatus[1],mydata$Sex[1],mydata$YearsOfEducation[1])
+  actmat[i,]<-actvec
+ }
+names(subjdf)<-c("id","age","adstatus","Sex","education")
+summary(subjdf)
+subjdf[2,]$education<-c(NA)
+subjdf$actmat<-actmat
+```
+
+First, we display the quantile functions of the AD group and CNC groups averaged over the respective samples.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=TRUE}
+subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
+p<-seq(0,1,l=101)
+indAD<-which(subjdf$adstatus==1)
+actad<-subjdf$actmat[indAD,]
+actcontrol<-subjdf$actmat[-indAD,]
+cnavg<-colMeans(actcontrol)
+adavg<-colMeans(actad)
+l1<-loess.smooth(p, cnavg,span = 0.5)
+l2<-loess.smooth(p, adavg,span=0.5)
+#plot raw average quantile function or smoothed
+plot(p,cnavg,type="l",col="blue",xlab="time of day",ylab="average activity quantile function")
+lines(p,adavg,type="l",col="red",lty=2)  
+legend('topleft',c("AD ","control") , 
+       lty=c(2,1), col=c("red", "blue"), bty='n', cex=.75)
+```
+
+We fit a SOFR model using the logit link function, modelling cognitive status (AD/CNC) using $Q_i(p)$ and adjusting for age,sex and education. The results from the fit and estimated functional effect $\beta(p)$ are shown below.
+
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=TRUE}
+library(refund)
+p<-seq(0,1,l=101)
+fit.lf <- pfr(adstatus~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2),data = subjdf,family="binomial")
+summary(fit.lf)
+plot(fit.lf,xlab="p",ylab=expression(paste(beta(p))),,main="effect on log odds of AD")
+abline(h=0)
+```
+
+This is simulated toy data, refer to the original report.  
+
+Next we fit SOFR, modelling the cognitive scores as linear functional of $Q_i(p)$ and adjusting for age,sex and education. The results from the model fit and the estimated coefficient functions are reported below.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
+load("toy_cognitive.Rdata") #loading cognitive data
+ind<-which(cogdatasub$id%in%subjdf$id)
+cogdatasub<-cogdatasub[ind,]
+cogdatasub<-cogdatasub[c(1:4,89:92,5:88),] ##matching the id order with subj
+subjdf$ATTN<-cogdatasub$ATTN
+subjdf$VM<-cogdatasub$VM
+subjdf$ExecFunction<-cogdatasub$ExecFunction
+
+library(refund)
+p<-seq(0,1,l=101)
+###############cognitive scores as outcome###########
+fit.lf1 <- pfr(ATTN~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2),data = subjdf)
+summary(fit.lf1) 
+plot(fit.lf1,xlab="p",ylab=expression(paste(beta(p))),main="effect on ATTN")
+abline(h=0)
+fit.lf2 <- pfr(VM~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2),data = subjdf)
+summary(fit.lf2) 
+plot(fit.lf2,xlab="p",ylab=expression(paste(beta(p))),main="effect on VM")
+abline(h=0)
+fit.lf3 <- pfr(ExecFunction~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2),data = subjdf)
+summary(fit.lf3) 
+plot(fit.lf3,xlab="p",ylab=expression(paste(beta(p))),main="effect on ExecFunction")
+abline(h=0)
+```
+
+**Results**
+
+This is simulated toy data, refer to the original report.  
+
+## Extension
+
+Next, we try a SOFR model of cognitive scores using both the subject specific quantile functions $Q_i(p)$ as well as the diurnal SD profiles $S_i(t)$ as predictors, as they could both contain potentially unique information.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
+qfdf<-subjdf
+qfdf$sd<-sddf$actmat
+colnames(qfdf$actmat) <- paste(1:101)
+colnames(qfdf$sd) <- paste(1:144)
+tbtick<-seq(0,1440,by=10)
+binmid<-tbtick+5
+binmid<-binmid[-145]
+load("toy_cognitive.Rdata")
+ind<-which(cogdatasub$id%in%subjdf$id)
+cogdatasub<-cogdatasub[ind,]
+cogdatasub<-cogdatasub[c(1:4,89:92,5:88),] ##matching the id order with subj
+qfdf$ATTN<-cogdatasub$ATTN
+qfdf$VM<-cogdatasub$VM
+qfdf$ExecFunction<-cogdatasub$ExecFunction
+
+library(refund)
+p<-seq(0,1,l=101)
+###############cognitive scores as outcome###########
+fit.lf1 <- pfr(ATTN~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2)+lf(sd,argvals=binmid/60, k=12, bs="ps",m=2),data = qfdf)
+summary(fit.lf1) #ADJ RSQ 0.311, both sign
+par(mfrow=c(1,2))
+plot(fit.lf1,select=1,ylim=c(-0.1,0.1),xlab="p",main="quantile effect",ylab=expression(paste(beta(p))))
+abline(h=0)
+plot(fit.lf1,select=2,ylim=c(-0.001,0.001),xlab="t",main="temporal effect sd",ylab=expression(paste(beta(t))))
+abline(h=0)
+#plot(fit.lf1)
+#abline(h=0)
+fit.lf2 <- pfr(VM~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2)+lf(sd,argvals=binmid/60, k=12, bs="ps",m=2),data = qfdf)
+summary(fit.lf2)  
+#plot(fit.lf2)
+#abline(h=0)
+fit.lf3 <- pfr(ExecFunction~ age+Sex+education+lf(actmat,argvals=p, k=12, bs="ps",m=2)+lf(sd,argvals=binmid/60, k=12, bs="ps",m=2),data = qfdf)
+summary(fit.lf3)
+```
+
+## Summary
+
+This is simulated toy data, refer to the original report. 
+
+# MFPCA Analysis
+Next we apply multi-level functional principal component analysis (MFPCA) to minute level actigraphy data and derive the subject-specific and day-specific scores to quantify their association with cognitive status. We use the "mfpca.sc" function in refund package for implementing MFPCA.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,eval=FALSE}
+#### Codeblock for MFPCA shown below ######
+library(ActCR)
+rm(list=ls())
+# processing raw minute level accelometry data (toy) for diurnal analysis
+path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+setwd(path)
+load("toy_accl.Rdata")
+myfiles <-toyfiles
+subjdf<-matrix(0,nrow = 92,ncol=5)
+subjdf<-as.data.frame(subjdf)
+actmatlist<-list()
+ 
+for(i in 1:92)
+{
+  mydata<-myfiles[[i]]
+  mydata$ADStatus<-ifelse(mydata$ADStatus=="Yes",1,0)
+  mydata$Sex<-ifelse(mydata$Sex=="Male",1,0)
+  #Date, Time , Vector.Magnitude
+  subdata<-mydata[,c("Date","Time","Vector.Magnitude")]
+  library(chron)
+  subdata$Time<-60 * 24 * as.numeric(times(subdata$Time))
+  subdata$Date<-as.factor(subdata$Date)
+  n<-nlevels(subdata$Date)
+  actmatlist[[i]]<- matrix(0,nrow = n,ncol=144)
+  datelev<-levels(subdata$Date)
+  tbtick<-seq(0,1440,by=10)
+  actvec<-c()
+  l=length(tbtick)-1
+  for(k in 1:n){
+    for (j in 1:l)
+    {
+      tempdataj<-subdata[ subdata$Date==datelev[k]&subdata$Time>=tbtick[j]&subdata$Time <tbtick[j+1],] 
+actmatlist[[i]][k,j]<-mean(tempdataj$Vector.Magnitude,na.rm =TRUE)
+    }
+  }
+ actmatlist[[i]][is.nan(actmatlist[[i]])]=NA
+  ##replacing NA with mean
+  for(s in 1:ncol(actmatlist[[i]])){
+    actmatlist[[i]][is.na(actmatlist[[i]][,s]), s] <- mean(actmatlist[[i]][,s], na.rm = TRUE)
+  }
+  
+  subjdf[i,]<-c(mydata$ID[1],mydata$Age[1],mydata$ADStatus[1],mydata$Sex[1],mydata$YearsOfEducation[1])
+}
+names(subjdf)<-c("id","age","adstatus","Sex","education")
+summary(subjdf)
+subjdf[2,]$education<-c(NA)
+idvec<-c()
+for (i in 1:92)
+{idvec<-c(idvec,rep(subjdf$id[i],nrow(actmatlist[[i]])))}
+
+Y<-Reduce(rbind,actmatlist) #932*144
+tbtick<-seq(0,1440,by=10)
+binmid<-tbtick+5
+binmid<-binmid[-145]
+library(refund)
+mfpcafit =  mfpca.sc(Y=Y, id = idvec, twoway = TRUE) 
+```
+
+mfpca takes long time to run, see the original report for subsequent analysis on the original data from the mfpca fit. The code for the analysis is provded below.
+
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,eval=FALSE}
+load("mfpcafit.RData")
+lev1score<-mfpcafit$scores$level1
+lev2score<-mfpcafit$scores$level2
+dim(lev1score)
+dim(lev2score)
+par(mfrow=c(3,3))
+par(oma=c(3,3,3,3),mar=c(3,4,1,1))
+#level1ef
+plot(binmid/60,mfpcafit$efunctions$level1[,1],xlab = "hour",ylab = "fpc1")
+plot(binmid/60,mfpcafit$efunctions$level1[,2],xlab = "hour",ylab = "fpc2")
+plot(binmid/60,mfpcafit$efunctions$level1[,3],xlab = "hour",ylab = "fpc3")
+plot(binmid/60,mfpcafit$efunctions$level1[,4],xlab = "hour",ylab = "fpc4")
+plot(binmid/60,mfpcafit$efunctions$level1[,5],xlab = "hour",ylab = "fpc5")
+plot(binmid/60,mfpcafit$efunctions$level1[,6],xlab = "hour",ylab = "fpc6")
+plot(binmid/60,mfpcafit$efunctions$level1[,7],xlab = "hour",ylab = "fpc7")
+mtext("First level subject specific eigenfunctions",side=3,line=0,outer=TRUE)
+
+par(mfrow=c(3,3))
+par(oma=c(3,3,3,3),mar=c(3,4,1,1))
+#level2ef
+plot(binmid/60,mfpcafit$efunctions$level2[,1],xlab = "hour",ylab = "fpc1")
+plot(binmid/60,mfpcafit$efunctions$level2[,2],xlab = "hour",ylab = "fpc2")
+plot(binmid/60,mfpcafit$efunctions$level2[,3],xlab = "hour",ylab = "fpc3")
+plot(binmid/60,mfpcafit$efunctions$level2[,4],xlab = "hour",ylab = "fpc4")
+plot(binmid/60,mfpcafit$efunctions$level2[,5],xlab = "hour",ylab = "fpc5")
+plot(binmid/60,mfpcafit$efunctions$level2[,6],xlab = "hour",ylab = "fpc6")
+plot(binmid/60,mfpcafit$efunctions$level2[,7],xlab = "hour",ylab = "fpc7")
+mtext("Second level subject_visit specific eigenfunctions",side=3,line=0,outer=TRUE)
+lev1score<-mfpcafit$scores$level1
+lev2score<-mfpcafit$scores$level2
+load("actmatlist_mean_visit_spec.Rdata")
+load("subjdf.Rdata")
+idvec<-c()
+for (i in 1:92)
+{idvec<-c(idvec,rep(subjdf$id[i],nrow(actmatlist[[i]])))}
+##get mean and sd of level2 score for each subject
+dfvisitspec<-matrix(0,92,2)
+for (i in 1:92)
+{ind<-which(idvec==subjdf$id[i])
+  tempscorev<-as.vector(lev2score[ind,])
+  dfvisitspec[i,1]<-mean(tempscorev)
+  dfvisitspec[i,2]<-sd(tempscorev)
+}
+subjdf<-cbind(subjdf,lev1score) ##adding level 1 scores
+subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
+names(subjdf)[6:12]<-paste("level1sc",1:7,sep="")
+subjdf<-subjdf[,-1]
+names(subjdf)
+subjdf<-cbind(subjdf,dfvisitspec) ##adding level2 scores
+names(subjdf)[12:13]<-c("mean_visit","sd_visit")
+fitglm_mfpca <- glm(adstatus~.,data = subjdf,family="binomial")
+tab_model(glm1,fitglm_mfpca,title = "Modelling cognitive status using MFPCA of activity data")
+
+```
+
+
+
+
+
+
+
+
+
+
