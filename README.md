@@ -5,7 +5,7 @@ Diurnal_Analysis_ref.html is a report containing analysis of continuous actigrap
 
 Diurnal_Analysis_ref.Rmd contains the all the codes used in the analysis of original data and is used to produce the Diurnal_Analysis_ref.html file.
 
-###################################################
+###################################################\
 toy_accl.Rdata is a simulated toy accelometry data\
 data structure: List, each element is data for one person\
 format: Each element of the list is a dataframe with the following columns\
