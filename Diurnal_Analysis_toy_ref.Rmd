@@ -54,7 +54,7 @@ We present below our analysis using the simulated toy data for acceleremetry and
 We consider paraetric analysis of actigraphy data using Cosinor models. We derive subject specific cosinor model parameters and study their association with cognitive status and cognitive performance represnted by cognitive scores of verbal memory (VM), attention (ATTN), and executive function (EF). The cosninor parameters mes (mesor representing a rhythm-adjusted mean), amp (amplitude representing variability around the mean) and acr(acrotime representing the timing of the peak activity) for each subject have been calculated using "ActCR" package (code shown below) from minute level activity data.
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
 # processing raw minute level accelometry data (toy) for cosinor analysis
-path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files here
 setwd(path)
 load("toy_accl.Rdata")
 myfiles <-toyfiles
@@ -176,9 +176,9 @@ tab_model(lm31,lm32,lm33,lm34,title = "Modelling cognitive scores of executive f
 We consider nonparametric analysis of actigraphy data using nonparametric indices of Circadian Rhythmicity. In Particular, we study association between the nonparametric indices of circadian rhythmicity with cognitive status and cognitive factor scores. The circadian indices
 IS (interdaily stability), IV (intradaily variability) and RA (relative amplitude) are again calculated using the "ActCR" package (code shown below) from minute level activity data.
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
-rm(list=ls())
+rm(list=setdiff(ls(), "path"))
 # processing raw minute level accelometry data (toy) for circadian analysis
-path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+#path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
 setwd(path)
 load("toy_accl.Rdata")
 myfiles <-toyfiles
@@ -316,9 +316,9 @@ tab_model(lm31,lm32,lm33,lm34,title = "Modelling cognitive scores of ececutive f
 We consider functional approaches for modelling continuous 24*7 actigraphy data. For each subject. we derive the mean daily activity curve $X_i(t)$ averaged over 7 days. 
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
-rm(list=ls())
+rm(list=setdiff(ls(), "path"))
 # processing raw minute level accelometry data (toy) for diurnal analysis
-path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+#path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
 setwd(path)
 load("toy_accl.Rdata")
 myfiles <-toyfiles
@@ -504,9 +504,9 @@ So far we have used the mean levels of daily activity as outcome or predictor in
 
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
-rm(list=ls())
+rm(list=setdiff(ls(), "path"))
 # processing raw minute level accelometry data (toy) for diurnal analysis
-path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+#path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
 setwd(path)
 load("toy_accl.Rdata")
 myfiles <-toyfiles
@@ -700,10 +700,10 @@ Distributional regression is an emerging area of research which have diverse app
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
 sddf<-subjdf
-rm(list=setdiff(ls(), "sddf"))
+rm(list=setdiff(ls(), c("sddf","path")))
 # processing raw minute level accelometry data (toy) for extracting
 #subject-specific quantile functions
-path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+#path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
 setwd(path)
 load("toy_accl.Rdata")
 myfiles<- toyfiles
@@ -849,9 +849,9 @@ Next we apply multi-level functional principal component analysis (MFPCA) to min
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE,eval=FALSE}
 #### Codeblock for MFPCA shown below ######
 library(ActCR)
-rm(list=ls())
+rm(list=setdiff(ls(), "path"))
 # processing raw minute level accelometry data (toy) for diurnal analysis
-path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
+#path <- "E:/JHUPD/Deliverables/data/data" #set your path to the data files 
 setwd(path)
 load("toy_accl.Rdata")
 myfiles <-toyfiles

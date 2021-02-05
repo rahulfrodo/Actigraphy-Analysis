@@ -463,7 +463,7 @@ summary {
 <h1><span class="header-section-number">3</span> Parametric Analysis Using Cosinor Modelling</h1>
 <p>We consider paraetric analysis of actigraphy data using Cosinor models. We derive subject specific cosinor model parameters and study their association with cognitive status and cognitive performance represnted by cognitive scores of verbal memory (VM), attention (ATTN), and executive function (EF). The cosninor parameters mes (mesor representing a rhythm-adjusted mean), amp (amplitude representing variability around the mean) and acr(acrotime representing the timing of the peak activity) for each subject have been calculated using “ActCR” package (code shown below) from minute level activity data.</p>
 <pre class="r"><code># processing raw minute level accelometry data (toy) for cosinor analysis
-path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
+path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files here
 setwd(path)
 load(&quot;toy_accl.Rdata&quot;)
 myfiles &lt;-toyfiles
@@ -2002,9 +2002,9 @@ R<sup>2</sup> / R<sup>2</sup> adjusted
 <div id="nonparametric-analysis-using-nonparametric-indices-of-circadian-rhythmicity" class="section level1">
 <h1><span class="header-section-number">4</span> Nonparametric Analysis using Nonparametric Indices of Circadian Rhythmicity</h1>
 <p>We consider nonparametric analysis of actigraphy data using nonparametric indices of Circadian Rhythmicity. In Particular, we study association between the nonparametric indices of circadian rhythmicity with cognitive status and cognitive factor scores. The circadian indices IS (interdaily stability), IV (intradaily variability) and RA (relative amplitude) are again calculated using the “ActCR” package (code shown below) from minute level activity data.</p>
-<pre class="r"><code>rm(list=ls())
+<pre class="r"><code>rm(list=setdiff(ls(), &quot;path&quot;))
 # processing raw minute level accelometry data (toy) for circadian analysis
-path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
+#path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
 setwd(path)
 load(&quot;toy_accl.Rdata&quot;)
 myfiles &lt;-toyfiles
@@ -3558,9 +3558,9 @@ R<sup>2</sup> / R<sup>2</sup> adjusted
 <div id="fosr-analysis-using-diurnal-mean-activity" class="section level1">
 <h1><span class="header-section-number">5</span> FOSR Analysis Using Diurnal Mean Activity</h1>
 <p>We consider functional approaches for modelling continuous 24*7 actigraphy data. For each subject. we derive the mean daily activity curve <span class="math inline">\(X_i(t)\)</span> averaged over 7 days.</p>
-<pre class="r"><code>rm(list=ls())
+<pre class="r"><code>rm(list=setdiff(ls(), &quot;path&quot;))
 # processing raw minute level accelometry data (toy) for diurnal analysis
-path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
+#path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
 setwd(path)
 load(&quot;toy_accl.Rdata&quot;)
 myfiles &lt;-toyfiles
@@ -3759,9 +3759,9 @@ summary(fit)</code></pre>
 <div id="fosr-analysis-using-diurnal-sd-activity-curves" class="section level1">
 <h1><span class="header-section-number">7</span> FOSR Analysis Using Diurnal SD Activity Curves</h1>
 <p>So far we have used the mean levels of daily activity as outcome or predictor in our analysis to explore its association with cognitive performance. The variability of the curves could also potentially provide uniqe insight into cognitive impairment. For this purpose we obtain the diurnal SD (standard deviation) curve <span class="math inline">\(S_i(t)\)</span> as follows. For raw activity data <span class="math inline">\(X_{ij}(s)\)</span>, <span class="math inline">\(j=1,\ldots,7\)</span> we define <span class="math inline">\(S_i(t)=sd\{X_{ij}(s)\}, s \in (t-h,t+h)\)</span>, where <span class="math inline">\(2*h\)</span> is the window length and taken to be 10 minutes in this analysis.</p>
-<pre class="r"><code>rm(list=ls())
+<pre class="r"><code>rm(list=setdiff(ls(), &quot;path&quot;))
 # processing raw minute level accelometry data (toy) for diurnal analysis
-path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
+#path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
 setwd(path)
 load(&quot;toy_accl.Rdata&quot;)
 myfiles &lt;-toyfiles
@@ -3944,10 +3944,10 @@ summary(fit)</code></pre>
 <h2><span class="header-section-number">9.1</span> SOFR analysis Using Subject Specific Quantile Functions</h2>
 <p>Distributional regression is an emerging area of research which have diverse applications specially for multi-view and repeated measures data. Various ways to incorporate the distributional information could involve the distribution function itself, density function, histogram, quantile function etc. Although they all essentially characterize the underlying distribution, they answer different questions from practical point of view. The subject specific quantile functions enjoy uniform support on <span class="math inline">\((0,1)\)</span> unlike subject specific histograms or distribution functions which can possibly have unequal (effective) support. In this section, We consider using the subject specific quantile functions <span class="math inline">\(Q_i(p)\)</span> of physical activity for SOFR modelling of cognitive status and cognitive scores.</p>
 <pre class="r"><code>sddf&lt;-subjdf
-rm(list=setdiff(ls(), &quot;sddf&quot;))
+rm(list=setdiff(ls(), c(&quot;sddf&quot;,&quot;path&quot;)))
 # processing raw minute level accelometry data (toy) for extracting
 #subject-specific quantile functions
-path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
+#path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
 setwd(path)
 load(&quot;toy_accl.Rdata&quot;)
 myfiles&lt;- toyfiles
@@ -4198,9 +4198,9 @@ abline(h=0)</code></pre>
 <p>Next we apply multi-level functional principal component analysis (MFPCA) to minute level actigraphy data and derive the subject-specific and day-specific scores to quantify their association with cognitive status. We use the “mfpca.sc” function in refund package for implementing MFPCA.</p>
 <pre class="r"><code>#### Codeblock for MFPCA shown below ######
 library(ActCR)
-rm(list=ls())
+rm(list=setdiff(ls(), &quot;path&quot;))
 # processing raw minute level accelometry data (toy) for diurnal analysis
-path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
+#path &lt;- &quot;E:/JHUPD/Deliverables/data/data&quot; #set your path to the data files 
 setwd(path)
 load(&quot;toy_accl.Rdata&quot;)
 myfiles &lt;-toyfiles
