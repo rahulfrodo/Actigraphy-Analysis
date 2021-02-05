@@ -5,4 +5,3 @@ Diurnal_Analysis_ref.html is a report containing analysis of continuous actigrap
 
 Diurnal_Analysis_ref.Rmd contains the all the codes used in the analysis of original data and is used to produce the Diurnal_Analysis_ref.html file.
 
-toysimdata.RData is a toy simulated data for testing diurnal analysis codes,  in particular analysis in FOSR_Diurnal_Mean, FOSR_Diurnal_SD, SOFR_Diurnal_Mean, SOFR_Diurnal_SD could be run by loading this data.
