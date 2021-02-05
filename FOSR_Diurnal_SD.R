@@ -12,7 +12,6 @@
 #  mydata<-myfiles[[i]]
 #  mydata$ADStatus<-ifelse(mydata$ADStatus=="Yes",1,0)
 #  mydata$Sex<-ifelse(mydata$Sex=="Male",1,0)
-#  mydata$Vector.Magnitude<-log(1+mydata$Vector.Magnitude)
 #  #Date, Time , Vector.Magnitude
 #  subdata<-mydata[,c("Date","Time","Vector.Magnitude")]
 #  library(chron)
