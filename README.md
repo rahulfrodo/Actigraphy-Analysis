@@ -27,8 +27,8 @@ data structure: data frame, each row is one person, with the following columns\
  $ VM          : (num)  Verbal memory score\
  $ ExecFunction: (num)  Executive function score
 
-Diurnal_Analysis_toy_ref.html contains code and analysis using the simulated toy datasets toy_accl.Rdata and toy_cognitive.Rdata.\
+Diurnal_Analysis_toy_ref.html contains code and analysis using the simulated toy datasets toy_accl.Rdata and toy_cognitive.Rdata.
 
-Diurnal_Analysis_toy_ref.Rmd contains the code for generating the .html file using the toy datasets. \
+Diurnal_Analysis_toy_ref.Rmd contains the code for generating the .html file using the toy datasets. 
 
 For running Diurnal_Analysis_toy_ref.Rmd the path within the code has to be set to path of the two datafiles toy_accl.Rdata and toy_cognitive.Rdata.
