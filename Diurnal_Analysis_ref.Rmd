@@ -691,6 +691,7 @@ for(i in 1:92)
   subdata<-mydata[,c("Date","Time","Vector.Magnitude")]
   library(chron)
   subdata$Time<-60 * 24 * as.numeric(times(subdata$Time))
+  subdata$Date<-as.factor(subdata$Date)
   n<-nlevels(subdata$Date)
   actmatlist[[i]]<- matrix(0,nrow = n,ncol=144)
   datelev<-levels(subdata$Date)

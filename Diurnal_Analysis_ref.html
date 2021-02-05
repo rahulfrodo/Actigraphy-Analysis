@@ -3989,6 +3989,7 @@ for(i in 1:92)
   subdata&lt;-mydata[,c(&quot;Date&quot;,&quot;Time&quot;,&quot;Vector.Magnitude&quot;)]
   library(chron)
   subdata$Time&lt;-60 * 24 * as.numeric(times(subdata$Time))
+  subdata$Date&lt;-as.factor(subdata$Date)
   n&lt;-nlevels(subdata$Date)
   actmatlist[[i]]&lt;- matrix(0,nrow = n,ncol=144)
   datelev&lt;-levels(subdata$Date)
