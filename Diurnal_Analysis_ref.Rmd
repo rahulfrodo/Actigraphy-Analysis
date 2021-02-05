@@ -1,7 +1,7 @@
 ---
 title: "Identification of clinically relevant characteristic patterns of physical activity measured via continuous actigraphy in subjects with and without Mild Alzheimer’s"
 author: "Rahul Ghosal"
-date: "11/06/2020"
+date: "12/02/2021"
 header-includes:
   - \usepackage{bm}
   - \usepackage{multirow}
@@ -65,7 +65,7 @@ First we explore cognitive status (AD or CNC) and Sex specific difference in the
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
 path <- "E:/JHUPD/Deliverables/data/data"
 setwd(path)
-load("cogdfcosinor.RData")
+load("cogdfcosinor.RData") #pre-extracted cosinor analysis data
 par(mfrow=c(2,2))
 boxplot(mes~adstatus,data=dfcomb,names=c("control","ad"),ylab="mes")
 boxplot(amp~adstatus,data=dfcomb,names=c("control","ad"),ylab="amp")
@@ -162,7 +162,7 @@ we display boxplot of the subject specific nornparametric indices against adstat
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
 path <- "E:/JHUPD/Deliverables/data/data"
 setwd(path)
-load("cogdfcirca.RData")
+load("cogdfcirca.RData") #pre-extracted circadian analysis data
 par(mfrow=c(2,2))
 boxplot(is~adstatus,data=dfcomb,names=c("control","ad"),ylab="IS")
 boxplot(iv~adstatus,data=dfcomb,names=c("control","ad"),ylab="IV")
@@ -237,7 +237,7 @@ We consider functional approaches for modelling continuous 24*7 actigraphy data.
 we derive the mean daily activity curve $X_i(t)$ averaged over 7 days. The smoothed average activity profiles for AD and cognitively normal control (CNC) samples are displayed below.
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
-load("actminutelevel_144.RData")
+load("actminutelevel_144.RData") #pre-extracted diurnal analysis (mean) data
 subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
 tbtick<-seq(0,1440,by=10)
 binmid<-tbtick+5
@@ -346,12 +346,12 @@ Next, we perform SOFR (scalar-on-function regression), modelling continuous cong
 
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
-load("actminutelevel_144.RData")
+load("actminutelevel_144.RData") #pre-extracted diurnal analysis (mean) data
 subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
 tbtick<-seq(0,1440,by=10)
 binmid<-tbtick+5
 binmid<-binmid[-145]
-cogdata<-read.csv("ACCEL cognitive data.csv")###aceel cogdata
+cogdata<-read.csv("ACCEL cognitive data.csv")### cognitive data
 ind<-which(cogdata$ï..ID%in%subjdf$id)
 cogdatasub<-cogdata[ind,]
 cogdatasub$id<-cogdatasub$ï..ID
@@ -387,7 +387,7 @@ So far we have used the mean levels of daily activity as outcome or predictor in
 
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
-load("actminutelevel_144_sd.RData")
+load("actminutelevel_144_sd.RData") #pre-extracted diurnal analysis (sd) data
 #summary(subjdf)
 subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
 tbtick<-seq(0,1440,by=10)
@@ -494,12 +494,12 @@ are displayed below.
 
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
-load("actminutelevel_144_sd.RData")
+load("actminutelevel_144_sd.RData") #pre-extracted diurnal analysis (sd) data
 subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
 tbtick<-seq(0,1440,by=10)
 binmid<-tbtick+5
 binmid<-binmid[-145]
-cogdata<-read.csv("ACCEL cognitive data.csv")###aceel cogdata
+cogdata<-read.csv("ACCEL cognitive data.csv") ### cognitive data
 ind<-which(cogdata$ï..ID%in%subjdf$id)
 cogdatasub<-cogdata[ind,]
 cogdatasub$id<-cogdatasub$ï..ID
@@ -539,8 +539,7 @@ We also used diurnal quantile activty profiles (95th perrcentile) which showed s
 Distributional regression is an emerging area of research which have diverse applications specially for multi-view and repeated measures data. Various ways to incorporate the distributional information could involve the distribution function itself, density function, histogram, quantile function etc. Although they all essentially characterize the underlying distribution, they answer different questions from practical point of view. The subject specific quantile functions enjoy uniform support on $(0,1)$ unlike subject specific histograms or distribution functions which can possibly have unequal (effective) support. In this section, We consider using the subject specific quantile functions $Q_i(p)$ of physical activity for SOFR modelling of cognitive status and cognitive scores. First, we display the quantile functions of the AD group and CNC groups averaged over the respective samples.
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=TRUE}
-load("actminutelevel_qf.RData")
-#summary(subjdf)
+load("actminutelevel_qf.RData") #pre-extracted subject-specific quantile functions #summary(subjdf)
 subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
 p<-seq(0,1,l=101)
 indAD<-which(subjdf$adstatus==1)
@@ -565,7 +564,7 @@ The AD samples have distinctly lower levels of maximal physical activity compare
 
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=TRUE}
-load("actminutelevel_qf.RData")
+load("actminutelevel_qf.RData") #pre-extracted quantile functions
 #summary(subjdf)
 subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
 library(refund)
@@ -581,9 +580,9 @@ The effect of the subject specific quantile functions is reported to be signific
 Next we fit SOFR, modelling the cognitive scores as linear functional of $Q_i(p)$ and adjusting for age,sex and education. The results from the model fit and the estimated coefficient functions are reported below.
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
-load("actminutelevel_qf.RData")
+load("actminutelevel_qf.RData") #pre-extracted quantile functions
 subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
-cogdata<-read.csv("ACCEL cognitive data.csv")###aceel cogdata
+cogdata<-read.csv("ACCEL cognitive data.csv")###cognitive data
 ind<-which(cogdata$ï..ID%in%subjdf$id)
 cogdatasub<-cogdata[ind,]
 cogdatasub$id<-cogdatasub$ï..ID
@@ -618,11 +617,11 @@ It can be noticed we achieve similar predictive performance in terms of adjusted
 Next, we try a SOFR model of cognitive scores using both the subject specific quantile functions $Q_i(p)$ as well as the diurnal SD profiles $S_i(t)$ as predictors, as they could both contain potentially unique information.
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE,echo=FALSE}
-load("actminutelevel_qf.RData")
+load("actminutelevel_qf.RData") #pre-extracted quantile functions
 subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
 qfdf<-subjdf
 rm(subjdf)
-load("actminutelevel_144_sd.RData")
+load("actminutelevel_144_sd.RData") #pre-extracted diurnal analysis (sd) data
 subjdf$education[2]<-mean(subjdf$education,na.rm=TRUE)
 sddf<-subjdf
 rm(subjdf)
@@ -676,7 +675,8 @@ Next we apply multi-level functional principal component analysis (MFPCA) to min
 library(ActCR)
 path <- "E:/JHUPD/Deliverables/data/data/minute-csv"
 setwd(path)
-filelist<-list.files("E:/JHUPD/Deliverables/data/data/minute-csv")
+#minute level raw data for each participant
+filelist<-list.files("E:/JHUPD/Deliverables/data/data/minute-csv") 
 myfiles <-lapply(filelist, read.csv)
 subjdf<-matrix(0,nrow = 92,ncol=5)
 subjdf<-as.data.frame(subjdf)
@@ -771,7 +771,7 @@ The first eigenfunction of both level-1 and level-2 captures the mean trajectory
 
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
-load("mfpcafit.RData")
+load("mfpcafit.RData") ##fitted mfpca data
 lev1score<-mfpcafit$scores$level1
 lev2score<-mfpcafit$scores$level2
 load("actmatlist_mean_visit_spec.Rdata")
