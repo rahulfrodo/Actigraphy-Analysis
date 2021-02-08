@@ -4247,6 +4247,11 @@ for (i in 1:92)
 {idvec&lt;-c(idvec,rep(subjdf$id[i],nrow(actmatlist[[i]])))}
 
 Y&lt;-Reduce(rbind,actmatlist) #932*144
+
+subjlen&lt;-c()     #number of visit for each subject
+for (i in 1:92)
+{subjlen[i]&lt;- nrow(actmatlist[[i]])}
+
 tbtick&lt;-seq(0,1440,by=10)
 binmid&lt;-tbtick+5
 binmid&lt;-binmid[-145]
@@ -4283,11 +4288,6 @@ plot(binmid/60,mfpcafit$efunctions$level2[,7],xlab = &quot;hour&quot;,ylab = &qu
 mtext(&quot;Second level subject_visit specific eigenfunctions&quot;,side=3,line=0,outer=TRUE)
 lev1score&lt;-mfpcafit$scores$level1
 lev2score&lt;-mfpcafit$scores$level2
-load(&quot;actmatlist_mean_visit_spec.Rdata&quot;)
-load(&quot;subjdf.Rdata&quot;)
-idvec&lt;-c()
-for (i in 1:92)
-{idvec&lt;-c(idvec,rep(subjdf$id[i],nrow(actmatlist[[i]])))}
 ##get mean and sd of level2 score for each subject
 dfvisitspec&lt;-matrix(0,92,2)
 for (i in 1:92)
