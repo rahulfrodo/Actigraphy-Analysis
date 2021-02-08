@@ -3969,7 +3969,7 @@ abline(h=0)</code></pre>
 <div id="mfpca-analysis" class="section level1">
 <h1><span class="header-section-number">10</span> MFPCA Analysis</h1>
 <p>Next we apply multi-level functional principal component analysis (MFPCA) to minute level actigraphy data and derive the subject-specific and day-specific scores to quantify their association with cognitive status. We use the “mfpca.sc” function in refund package for implementing MFPCA.</p>
-<pre class="r"><code>#### Codeblock for MFPCA shown below ######
+<pre class="r"><code>#### Codeblock for processing data for MFPCA shown below ######
 library(ActCR)
 path &lt;- &quot;E:/JHUPD/Deliverables/data/data/minute-csv&quot;
 setwd(path)
@@ -4012,8 +4012,22 @@ actmatlist[[i]][k,j]&lt;-mean(tempdataj$Vector.Magnitude,na.rm =TRUE)
   subjdf[i,]&lt;-c(mydata$id[1],mydata$Age[1],mydata$ADStatus[1],mydata$Sex[1],mydata$YearsOfEducation[1])
 }
 names(subjdf)&lt;-c(&quot;id&quot;,&quot;age&quot;,&quot;adstatus&quot;,&quot;Sex&quot;,&quot;education&quot;)
-summary(subjdf)
-subjdf[2,]$education&lt;-c(NA)
+summary(subjdf)</code></pre>
+<pre><code>##        id              age           adstatus           Sex        
+##  Min.   :  2.00   Min.   :60.00   Min.   :0.0000   Min.   :0.0000  
+##  1st Qu.: 31.75   1st Qu.:67.75   1st Qu.:0.0000   1st Qu.:0.0000  
+##  Median : 57.50   Median :74.00   Median :0.0000   Median :0.0000  
+##  Mean   : 55.84   Mean   :73.36   Mean   :0.4239   Mean   :0.4783  
+##  3rd Qu.: 80.25   3rd Qu.:78.00   3rd Qu.:1.0000   3rd Qu.:1.0000  
+##  Max.   :103.00   Max.   :92.00   Max.   :1.0000   Max.   :1.0000  
+##    education       
+##  Min.   :-999.000  
+##  1st Qu.:  14.000  
+##  Median :  16.000  
+##  Mean   :   5.522  
+##  3rd Qu.:  18.250  
+##  Max.   :  25.000</code></pre>
+<pre class="r"><code>subjdf[2,]$education&lt;-c(NA)
 idvec&lt;-c()
 for (i in 1:92)
 {idvec&lt;-c(idvec,rep(subjdf$id[i],nrow(actmatlist[[i]])))}
@@ -4021,8 +4035,9 @@ for (i in 1:92)
 Y&lt;-Reduce(rbind,actmatlist) #932*144
 tbtick&lt;-seq(0,1440,by=10)
 binmid&lt;-tbtick+5
-binmid&lt;-binmid[-145]
-library(refund)
+binmid&lt;-binmid[-145]</code></pre>
+<p>We use mpfca.sc function in the refund package for implementation.</p>
+<pre class="r"><code>library(refund)
 mfpcafit =  mfpca.sc(Y=Y, id = idvec, twoway = TRUE) </code></pre>
 <p>We obtain the level-1 and level-2 subject-specific and day-specific scores.</p>
 <pre class="r"><code>load(&quot;mfpcafit.RData&quot;)
@@ -4062,11 +4077,6 @@ mtext(&quot;Second level subject_visit specific eigenfunctions&quot;,side=3,line
 <pre class="r"><code>load(&quot;mfpcafit.RData&quot;) ##fitted mfpca data
 lev1score&lt;-mfpcafit$scores$level1
 lev2score&lt;-mfpcafit$scores$level2
-load(&quot;actmatlist_mean_visit_spec.Rdata&quot;)
-load(&quot;subjdf.Rdata&quot;)
-idvec&lt;-c()
-for (i in 1:92)
-{idvec&lt;-c(idvec,rep(subjdf$id[i],nrow(actmatlist[[i]])))}
 ##get mean and sd of level2 score for each subject
 dfvisitspec&lt;-matrix(0,92,2)
 for (i in 1:92)

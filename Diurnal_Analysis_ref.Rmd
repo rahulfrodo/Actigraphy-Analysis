@@ -670,8 +670,8 @@ We observe a improved performance for cognitive scores of ATTN (around $47\%$ in
 # MFPCA Analysis
 Next we apply multi-level functional principal component analysis (MFPCA) to minute level actigraphy data and derive the subject-specific and day-specific scores to quantify their association with cognitive status. We use the "mfpca.sc" function in refund package for implementing MFPCA.
 
-```{r, tidy = FALSE,message=FALSE,warning=FALSE,eval=FALSE}
-#### Codeblock for MFPCA shown below ######
+```{r, tidy = FALSE,message=FALSE,warning=FALSE}
+#### Codeblock for processing data for MFPCA shown below ######
 library(ActCR)
 path <- "E:/JHUPD/Deliverables/data/data/minute-csv"
 setwd(path)
@@ -724,10 +724,14 @@ Y<-Reduce(rbind,actmatlist) #932*144
 tbtick<-seq(0,1440,by=10)
 binmid<-tbtick+5
 binmid<-binmid[-145]
+```
+
+We use mpfca.sc function in the refund package for implementation.
+
+```{r, tidy = FALSE,message=FALSE,warning=FALSE,eval=FALSE}
 library(refund)
 mfpcafit =  mfpca.sc(Y=Y, id = idvec, twoway = TRUE) 
 ```
-
 
 We obtain the level-1 and level-2 subject-specific and day-specific scores.
 
@@ -775,11 +779,6 @@ The first eigenfunction of both level-1 and level-2 captures the mean trajectory
 load("mfpcafit.RData") ##fitted mfpca data
 lev1score<-mfpcafit$scores$level1
 lev2score<-mfpcafit$scores$level2
-load("actmatlist_mean_visit_spec.Rdata")
-load("subjdf.Rdata")
-idvec<-c()
-for (i in 1:92)
-{idvec<-c(idvec,rep(subjdf$id[i],nrow(actmatlist[[i]])))}
 ##get mean and sd of level2 score for each subject
 dfvisitspec<-matrix(0,92,2)
 for (i in 1:92)
