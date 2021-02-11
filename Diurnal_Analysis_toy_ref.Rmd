@@ -379,7 +379,7 @@ legend('topleft',c("AD ","control") ,
        lty=c(2,1), col=c("red", "blue"), bty='n', cex=.75)
 ```
 
-We fit a function-on-scalar regression (FOSR) model analyzing dependence of diurnal mean activity on adstatus (AD/CNC) and adjusting for age, sex and eucation. We use the pffr function in "refund" package for implementation of FOSR.
+We fit a function-on-scalar regression (FOSR) model analyzing dependence of diurnal mean activity on adstatus (AD/CNC) and adjusting for age, sex and education. We use the pffr function in "refund" package for implementation of FOSR.
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
 library(refund)
@@ -908,6 +908,7 @@ binmid<-tbtick+5
 binmid<-binmid[-145]
 library(refund)
 mfpcafit =  mfpca.sc(Y=Y, id = idvec, twoway = TRUE) 
+#save(mfpcafit,file="mfpcafit.RData")   #save this data after running mfpca
 ```
 
 mfpca takes long time to run, see the original report for subsequent analysis on the original data from the mfpca fit. The code for the analysis is provded below.
