@@ -260,7 +260,7 @@ legend('topleft',c("AD ","control") ,
 ```
 
 The AD samples have distinctly lower activity levels during
-morning (10 a.m) to late afternoon (4-5 p.m). We fit a function-on-scalar regression (FOSR) model analyzing dependence of diurnal mean activity on adstatus (AD/CNC) and adjusting for age, sex and eucation. We use the pffr function in "refund" package for implementation of FOSR.
+morning (10 a.m) to late afternoon (4-5 p.m). We fit a function-on-scalar regression (FOSR) model analyzing dependence of diurnal mean activity on adstatus (AD/CNC) and adjusting for age, sex and education. We use the pffr function in "refund" package for implementation of FOSR.
 
 ```{r, tidy = FALSE,message=FALSE,warning=FALSE}
 library(refund)
@@ -529,7 +529,7 @@ abline(h=0)
 * The plot of the coefficient functions again reveal the window 8 a.m to 3 p.m to be significant.
 
 **Remark:** 
-We also used diurnal quantile activty profiles (95th perrcentile) which showed similar patterns and predictive performance in both FOSR and SOFR modelling as SD_activity.
+We also used diurnal quantile activity profiles (95th perrcentile) which showed similar patterns and predictive performance in both FOSR and SOFR modelling as SD_activity.
 
 
 # Modelling Using Subject Specific Quantile Functions of Activity 
